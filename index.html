@@ -133,6 +133,7 @@
     }
 
     async function loop(timestamp) {
+
         webcam.update(); // update the webcam frame
         await predict();
         window.requestAnimationFrame(loop);
@@ -140,6 +141,7 @@
 
 
     async function predict() {
+        const audio = new Audio('alert.wav');
         // Prediction #1: run input through posenet
         // estimatePose can take in an image, video or canvas html element
         const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
@@ -150,28 +152,26 @@
         const focused = prediction[0].probability.toFixed(2)
         const distracted = prediction[1].probability.toFixed(2)
         const canvas = document.getElementById("canvas");
-
+        
         if (distracted > focused) {
             labelContainer.innerHTML = "Keep your eyes on the road"
             labelContainer.classList.remove("bg-blue-700")
             labelContainer.classList.add("bg-red-700")
             canvas.classList.add("ring-red-700")
             canvas.classList.remove("ring-blue-700")
-            if (window.navigator && window.navigator.vibrate) {
-                navigator.vibrate(1000);
-            } else {
-                console.log("not supported")
-            }
+            audio.play()
         } else {
             labelContainer.innerHTML = "Stay focused"
             labelContainer.classList.remove("bg-red-700")
             labelContainer.classList.add("bg-blue-700")
             canvas.classList.add("ring-blue-700")
             canvas.classList.remove("ring-red-700")
+            audio.pause()
         }
 
         // finally draw the poses
         drawPose(pose);
+
     }
 
     function drawPose(pose) {
